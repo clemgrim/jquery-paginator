@@ -1,0 +1,32 @@
+{
+  "name": "jquery-paginator",
+  "version": "0.0.1",
+  "description": "",
+  "main": "Gulpfile.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clemgrim/jquery-paginator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/clemgrim/jquery-paginator/issues"
+  },
+  "homepage": "https://github.com/clemgrim/jquery-paginator",
+  "devDependencies": {
+    "gulp": "^3.8.8",
+    "gulp-jshint": "^1.8.4",
+    "gulp-livereload": "^2.1.1",
+    "gulp-plumber": "^0.6.5",
+    "gulp-rename": "^1.2.0",
+    "gulp-uglify": "^1.0.1",
+    "gulp-watch": "^1.0.3",
+    "jshint-stylish": "^0.4.0"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "jquery-paginator",
+  "version": "0.0.1",
+  "homepage": "https://github.com/clemgrim/jquery-paginator",
+  "authors": [
+    "clemgrim <clemgrim@gmail.com>"
+  ],
+  "keywords": [
+    "jquery",
+    "pagination",
+    "paginator",
+    "bootstrap"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.2.0",
+    "twbs-pagination": "~1.2.1",
+    "jquery": "~2.1.1"
+  },
+  "devDependencies": {
+    "qunit": "~1.15.0"
+  }
+}
