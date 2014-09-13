@@ -54,7 +54,7 @@ Here are options you could override, with their default values
 
 ```js
 $.fn.paginate.defaults = {
-		startPage: 1,
+    startPage: 1,
     totalPages: 1,
     visiblePages: 5,
     href: '#/page-{{number}}',
@@ -78,6 +78,6 @@ $.fn.paginate.defaults = {
 	  first: '<<',
 	  last: '>>'
   });
-	```
+```
 
 	
