@@ -6,7 +6,7 @@ A jquery plugin for create twitter bootstrap pagination, and handle items displa
 This plugin handle the pagination for elements inside a list : 
 * it creates a bootstrap pagination
 * it handles show / hide of items while user click
-* you can apply filter to your items, to update pagination
+* you can apply filter on your items, to update pagination
 
 ```html
 <div class="block odd">
@@ -72,7 +72,7 @@ Here are options you could override, with their default values
 	    onDraw: $.noop,
 	    hideWhenUseless: true,
 	    count: false, // if true, display a pagination counter
-	    counter: '{{first}} to {{last}} of {{count}}', // text for counter, you can use : first, last, page, count, pageCount
+	    counter: '{{first}} to {{last}} of {{count}}', // text for counter, you can use : first, last, page, count, pageCount (it can contains html)
 	    counterObvious: '{{first}} of {{count}}' // if you have only one item on your page (first = last), show this counter instead
 	};
 	
@@ -87,6 +87,46 @@ Here are options you could override, with their default values
   });
 ```
 
-## 
+## Methods
+You can call plugin methods with this syntax (after you have initialized the plugin)
 
+```js
+	$('.pagination').paginate('methodName', arg1, arg2, ...);
+```
+
+### setPage(int) *chainable*
+Change the current page
+
+### update(function) *chainable*
+Update the pagination
+The filter function will filter your items to determine if they have to be shown or hide (if you want to apply filters)
+
+```js
+	var toShow = [1,2,5,6];
+	var id;
 	
+	$('.pagination').paginate('update', function () {
+		id = $(this).data('id');
+		return toShow.indexOf(id) > -1; // will show items that have attribute `data-id` in toShow array
+										// other items are hidden
+	});
+```
+
+### option(string, mixed) *chainable*
+Set an option for the plugin. It is the only way to override your plugin option after its initialization
+
+```js
+	$('.pagination').paginate('visiblePages', 3);
+```
+
+### remove() *chainable*
+Destroy the plugin instance and clean the element
+	
+### getCount()
+Get paginated items count
+
+### getPageCount()
+Get the page count
+
+### getPage()
+Get the current page

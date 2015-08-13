@@ -31,8 +31,10 @@
 	
 			// wrap pagination if user want to show pagination count
 			if (this.options.count) {
-				this.$el.wrap('<div class="row pagination-wrapper"/>').before('<div class="col-md-5 pagination-count"/>');
-				this.$el.addClass('col-md-7');
+				if (!this.options.counterTarget) {
+					this.$el.wrap('<div class="row pagination-wrapper"/>').before('<div class="col-md-5 pagination-count"/>');
+					this.$el.addClass('col-md-7');
+				}
 			}
 	
 			this.items = $(this.options.selector);
@@ -194,14 +196,14 @@
 	    		var first = start + 1;
 	    		var last = start + shown;
 	    		var counter = first != last ? this.options.counter : this.options.counterObvious;
-
+	    			
 	    		counter = counter.replace('{{first}}', first)
     							.replace('{{last}}', last)
     							.replace('{{count}}', this.results.length)
     							.replace('{{page}}', page)
     							.replace('{{pageCount}}', this.options.totalPages);
 	    		
-	    		this.$el.prev('.pagination-count').html(counter);
+	    		this._getCounterTarget().html(counter);
 	    	}
 	    };
 	    
@@ -229,11 +231,19 @@
 	    /** Destroy plugin instance */
 	    this.remove = function () {
 	    	if (this.options.count) {
-		    	this.$el.removeClass('col-md-7').data('$el', null);
-		    	this.$el.parent().before(this.$el).remove();
+	    		if (this.options.countTarget) {
+	    			this._getCounterTarget().empty();
+	    		} else {
+			    	this.$el.removeClass('col-md-7').data('$el', null);
+			    	this.$el.parent().before(this.$el).remove();
+	    		}
 	    	}
 	    	
 	    	this.$el.data('$el', null);
+	    };
+	    
+	    this._getCounterTarget = function () {
+	    	return this.options.counterTarget ? (this.options.counterTarget.jquery ? this.options.counterTarget : $(this.options.counterTarget)) : this.$el.prev('.pagination-count');
 	    };
 	}
 	
@@ -256,17 +266,18 @@
 	    totalPages: 1,
 	    visiblePages: 5,
 	    href: '#/page-{{number}}',
-	    first: '',
+	    first: '<i class="fa fa-step-backward"></i>',
 	    prev: false,
 	    next: false,
-	    last: '',
+	    last: '<i class="fa fa-step-forward"></i>',
 	    selector: '.item',
 	    nbItemsPerPage: 5,
 	    onClick: $.noop,
 	    onDraw: $.noop,
 	    hideWhenUseless: true,
 	    count: false,
-	    counter: '{{first}} to {{last}} of {{count}}',
-	    counterObvious: '{{first}} of {{count}}'
+	    counter: '{{first}} to {{last}} to {{count}}',
+	    counterObvious: '{{first}} of {{count}}',
+	    counterTarget: false,
 	};
 })(jQuery);
