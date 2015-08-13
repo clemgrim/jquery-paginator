@@ -1,4 +1,4 @@
-(function ($) {
+(function ($, undefined) {
 	'use strict';
 	
 	var Pagination = {
@@ -66,12 +66,8 @@
 	    			return data === true || data === undefined;
 	    		});
 	    		
-	    		if (typeof filter !== 'undefined') {
-		    		filter = parseInt(filter);
-	
-		    		if (filter > 1) {
-		    			page = filter;
-		    		}
+	    		if (filter > 1) {
+		    		page = parseInt(filter);
 		    	}
 	    	}
 	
@@ -80,7 +76,11 @@
 		    	var method = this.results.length <= this.options.nbItemsPerPage ? 'hide' : 'show';
 		    	
 		    	if (this.options.count) {
-		    		this.$el.parent()[method]();
+		    		if (!this.options.counterTarget) {
+		    			this.$el.parent()[method]();
+		    		} else {
+		    			this._getCounterTarget().add(this.$el)[method]();
+		    		}
 		    	} else {
 		    		this.$el[method]();
 		    	}
@@ -239,11 +239,11 @@
 	    		}
 	    	}
 	    	
-	    	this.$el.data('$el', null);
+	    	this.$el.data('$el', null).empty();
 	    };
 	    
 	    this._getCounterTarget = function () {
-	    	return this.options.counterTarget ? (this.options.counterTarget.jquery ? this.options.counterTarget : $(this.options.counterTarget)) : this.$el.prev('.pagination-count');
+	    	return this.options.counterTarget ? $(this.options.counterTarget) : this.$el.prev('.pagination-count');
 	    };
 	}
 	
