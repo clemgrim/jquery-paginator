@@ -5,6 +5,7 @@
   "authors": [
     "clemgrim <clemgrim@gmail.com>"
   ],
+  "main": "jquery-paginator.js",
   "keywords": [
     "jquery",
     "pagination",
