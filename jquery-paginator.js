@@ -1,6 +1,18 @@
 (function ($) {
 	'use strict';
 	
+	var Pagination = {
+		click: function (i, cb) {
+			return function (e) {
+				e.preventDefault();
+				cb(i);
+			};
+		},
+		page: function (text, cls) {
+			return $('<li class="' + cls + '" />').append('<a href="#">' + text + '</a>');
+		}
+	};
+	
 	function PaginatePlugin ($el) {
 		this.$el = $el;
 	
@@ -13,18 +25,9 @@
 		/** Init pagination */
 		this.init = function (options) {
 			var self = this;
-	
+
 			// merge user options with default plugin options
-			$.extend(this.options, $.fn.paginate.defaults, options, {
-		        onPageClick: function (e, page) {
-		        	e.preventDefault();
-		        	self.drawPage(page);
-		        	
-		        	if ($.isFunction(self.options.onClick)) {
-		        		self.options.onClick(page);
-		        	}
-		        },
-		    });
+			$.extend(this.options, $.fn.paginate.defaults, options);
 	
 			// wrap pagination if user want to show pagination count
 			if (this.options.count) {
@@ -41,8 +44,8 @@
 	    
 	    /** Update pagination. Filter is a function that will be used with $.fn.filter to filter items to show */
 	    this.pagine = function (filter) {
-	    	var page = 1;
-	    	
+	    	var page = this.options.startPage;
+
 	    	// Try to detect if the current page is in the hash url
 	    	if (location.hash) {
 	    		var match = location.hash.match(/page-([0-9]+)/);
@@ -70,10 +73,6 @@
 		    	}
 	    	}
 	
-	    	if (this.$el.data('twbs-pagination')) {
-	    		this.$el.twbsPagination('destroy');
-	    	}
-	    	
 	    	// show/hide pagination if no results
 	    	if (this.options.hideWhenUseless) {
 		    	var method = this.results.length <= this.options.nbItemsPerPage ? 'hide' : 'show';
@@ -87,20 +86,81 @@
 	    	
 	    	this.options.totalPages = Math.ceil(this.results.length / this.options.nbItemsPerPage);
 	
-	    	// update pagination
-	    	if (this.options.totalPages > 0) {
-	    		this.$el.twbsPagination(this.options);
-	    	}
-	
-	    	// draw the page (update items display status)
-	    	this.drawPage(page);
+	    	// update current page
+	    	this.setPage(page);
 	    };
 	    
 	    /** Change the current page */
-	    this.setPage = function (page, draw) {
-	    	if (page <= this.options.totalPages && page > 0) {
-	    		this.$el.find('li').eq(page).click();
+	    this.setPage = function (page) {
+	    	page = page > this.options.totalPages || page < 1 ? 1 : parseInt(page);
+	    	
+	    	if (this.options.totalPages < 1) {
+	    		return;
 	    	}
+    		
+    		if ($.isFunction(this.options.onClick)) {
+        		this.options.onClick(page);
+        	}
+	    	
+    		var delta = parseInt(this.options.visiblePages / 2);
+    		var cb = $.proxy(this.setPage, this);
+    		var start, end;
+    		
+    		// determine start and end page to display
+    		if (page + delta <= this.options.totalPages) {
+	    		start = Math.max(page - delta,  1);
+	    		end = Math.min(start + this.options.visiblePages - 1, this.options.totalPages);
+    		} else {
+	    		end = Math.min(page + delta, this.options.totalPages);
+	    		start = Math.max(end - this.options.visiblePages + 1,  1);
+    		}
+    		
+    		// build pagination
+    		this.$el.empty();
+    		
+    		for (var i = start ; i <= end ; i++) {
+    			var p = Pagination.page(i, 'page');
+    			
+    			if (i == page) {
+    				p.addClass('active');
+    			}
+    			
+    			this.$el.append(p.click(Pagination.click(i, cb)));
+    		}
+
+    		// add navigation buttons
+    		if (this.options.prev !== false) {
+    			this.$el.prepend(Pagination.page(this.options.prev, 'prev').click(Pagination.click(page - 1, cb)));
+    		}
+    		
+    		if (this.options.first !== false) {
+    			this.$el.prepend(Pagination.page(this.options.first, 'first').click(Pagination.click(1, cb)));
+    		}
+    		
+    		if (this.options.next !== false) {
+    			this.$el.append(Pagination.page(this.options.next, 'next').click(Pagination.click(page+1, cb)));
+    		}
+    		
+    		if (this.options.last !== false) {
+    			this.$el.append(Pagination.page(this.options.last, 'last').click(Pagination.click(this.options.totalPages, cb)));
+    		}
+    		
+    		// set buttons classes
+    		if (page === 1) {
+    			this.$el.find('.first, .prev').addClass('disabled');
+    		}
+    		
+    		if (page === this.options.totalPages) {
+    			this.$el.find('.last, .next').addClass('disabled');
+    		}
+    		
+    		// add url hash
+    		if (this.options.href) {
+    			location.hash = this.options.href.replace('{{number}}', page);
+    		}
+    		
+    		// show items for the selected page
+	    	this.drawPage(page);
 	    };
 	    
 	    /** Alias of paginate */
@@ -166,10 +226,6 @@
 	    	}
 	    	
 	    	this.$el.data('$el', null);
-	    	
-	    	if (this.$el.data('twbs-pagination')) {
-	    		this.$el.twbsPagination('destroy');
-	    	}
 	    };
 	}
 	
@@ -192,10 +248,10 @@
 	    totalPages: 1,
 	    visiblePages: 5,
 	    href: '#/page-{{number}}',
-	    first: ' ', //'<i class="fa fa-step-backward"></i>',
-	    prev: '', //'<i class="fa fa-chevron-left"></i>',
-	    next: '', //'<i class="fa fa-chevron-right"></i>',
-	    last: ' ', //'<i class="fa fa-step-forward"></i>',
+	    first: '',
+	    prev: false,
+	    next: false,
+	    last: '',
 	    selector: '.item',
 	    nbItemsPerPage: 5,
 	    onClick: $.noop,
