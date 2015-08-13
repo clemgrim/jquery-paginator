@@ -2,14 +2,8 @@
 	'use strict';
 	
 	var Pagination = {
-		click: function (i, cb) {
-			return function (e) {
-				e.preventDefault();
-				cb(i);
-			};
-		},
-		page: function (text, cls) {
-			return $('<li class="' + cls + '" />').append('<a href="#">' + text + '</a>');
+		page: function (text, cls, cb) {
+			return $('<li class="' + cls + '" />').append('<a href="#">' + text + '</a>').click(cb || $.noop);
 		}
 	};
 	
@@ -87,7 +81,7 @@
 	    	}
 	    	
 	    	this.options.totalPages = Math.ceil(this.results.length / this.options.nbItemsPerPage);
-	
+
 	    	// update current page
 	    	this.setPage(page);
 	    };
@@ -95,18 +89,9 @@
 	    /** Change the current page */
 	    this.setPage = function (page) {
 	    	page = page > this.options.totalPages || page < 1 ? 1 : parseInt(page);
-	    	
-	    	if (this.options.totalPages < 1) {
-	    		return;
-	    	}
-    		
-    		if ($.isFunction(this.options.onClick)) {
-        		this.options.onClick(page);
-        	}
-	    	
+
+	    	var start, end;
     		var delta = parseInt(this.options.visiblePages / 2);
-    		var cb = $.proxy(this.setPage, this);
-    		var start, end;
     		
     		// determine start and end page to display
     		if (page + delta <= this.options.totalPages) {
@@ -116,51 +101,15 @@
 	    		end = Math.min(page + delta, this.options.totalPages);
 	    		start = Math.max(end - this.options.visiblePages + 1,  1);
     		}
-    		
-    		// build pagination
-    		this.$el.empty();
-    		
-    		for (var i = start ; i <= end ; i++) {
-    			var p = Pagination.page(i, 'page');
-    			
-    			if (i == page) {
-    				p.addClass('active');
-    			}
-    			
-    			this.$el.append(p.click(Pagination.click(i, cb)));
-    		}
 
-    		// add navigation buttons
-    		if (this.options.prev !== false) {
-    			this.$el.prepend(Pagination.page(this.options.prev, 'prev').click(Pagination.click(page - 1, cb)));
-    		}
-    		
-    		if (this.options.first !== false) {
-    			this.$el.prepend(Pagination.page(this.options.first, 'first').click(Pagination.click(1, cb)));
-    		}
-    		
-    		if (this.options.next !== false) {
-    			this.$el.append(Pagination.page(this.options.next, 'next').click(Pagination.click(page+1, cb)));
-    		}
-    		
-    		if (this.options.last !== false) {
-    			this.$el.append(Pagination.page(this.options.last, 'last').click(Pagination.click(this.options.totalPages, cb)));
-    		}
-    		
-    		// set buttons classes
-    		if (page === 1) {
-    			this.$el.find('.first, .prev').addClass('disabled');
-    		}
-    		
-    		if (page === this.options.totalPages) {
-    			this.$el.find('.last, .next').addClass('disabled');
-    		}
+    		// build pagination
+    		this._build(page, start, end);
     		
     		// add url hash
     		if (this.options.href) {
     			location.hash = this.options.href.replace('{{number}}', page);
     		}
-    		
+
     		// show items for the selected page
 	    	this.drawPage(page);
 	    };
@@ -174,11 +123,11 @@
 	    this.drawPage = function (page) {
 	    	this.items.data('p_filtered', false).hide();
 	    	this.page = page;
-	    	
+
 	    	var start = (page-1)*this.options.nbItemsPerPage,
 	    		limit = this.options.nbItemsPerPage + start,
 	    		shown = 0;
-			
+
 	    	this.results.each(function (i) {
 	    		$(this).data('p_filtered', true);
 	    		
@@ -187,7 +136,7 @@
 	    			$(this).show();
 	    		}
 	    	});
-	
+
 	    	if ($.isFunction(this.options.onDraw)) {
 	    		this.options.onDraw(page);
 	    	}
@@ -245,6 +194,64 @@
 	    this._getCounterTarget = function () {
 	    	return this.options.counterTarget ? $(this.options.counterTarget) : this.$el.prev('.pagination-count');
 	    };
+	    
+	    this._pageClick = function (page) {
+	    	var self = this;
+	    	
+	    	return function (e) {
+	    		e.preventDefault();
+	    		
+    			if ($.isFunction(self.options.onClick)) {
+    				self.options.onClick(page);
+            	}
+    			
+    			self.setPage(page);
+	    	};
+	    };
+	    
+	    this._build = function (page, start, end) {
+	    	this.$el.empty();
+    		
+	    	if (start > end) {
+	    		return;
+	    	}
+	    	
+    		for (var i = start ; i <= end ; i++) {
+    			var p = Pagination.page(i, 'page', this._pageClick(i));
+    			
+    			if (i == page) {
+    				p.addClass('active');
+    			}
+    			
+    			this.$el.append(p);
+    		}
+
+    		// add navigation buttons
+    		if (this.options.prev !== false) {
+    			this.$el.prepend(Pagination.page(this.options.prev, 'prev', this._pageClick(page-1)));
+    		}
+    		
+    		if (this.options.first !== false) {
+    			this.$el.prepend(Pagination.page(this.options.first, 'first', this._pageClick(1)));
+    		}
+    		
+    		if (this.options.next !== false) {
+    			this.$el.append(Pagination.page(this.options.next, 'next', this._pageClick(page+1)));
+    		}
+    		
+    		if (this.options.last !== false) {
+    			this.$el.append(Pagination.page(this.options.last, 'last', this._pageClick(this.options.totalPages)));
+    		}
+    		
+    		// set buttons classes
+    		if (page === 1) {
+    			this.$el.find('.first, .prev').addClass('disabled');
+    		}
+    		
+    		if (page === this.options.totalPages) {
+    			this.$el.find('.last, .next').addClass('disabled');
+    		}
+	    };
 	}
 	
 	$.fn.paginate = function (method) {
@@ -258,7 +265,7 @@
 			ret = Plugin[method].apply(Plugin, [].slice.call(arguments, 1));
 		}
 		
-		return ~[void 0, null].indexOf(ret) ? this : ret;
+		return ~[undefined, null].indexOf(ret) ? this : ret;
 	};
 	
 	$.fn.paginate.defaults = {
