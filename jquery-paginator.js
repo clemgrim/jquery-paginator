@@ -1,12 +1,6 @@
 (function ($, undefined) {
 	'use strict';
 	
-	var Pagination = {
-		page: function (text, cls, cb) {
-			return $('<li class="' + cls + '" />').append('<a href="#">' + text + '</a>').click(cb || $.noop);
-		}
-	};
-	
 	function PaginatePlugin ($el) {
 		this.$el = $el;
 	
@@ -228,19 +222,19 @@
 
     		// add navigation buttons
     		if (this.options.prev !== false) {
-    			this.$el.prepend(Pagination.page(this.options.prev, 'prev', this._pageClick(page-1)));
+    			this.$el.prepend(this._page(this.options.prev, 'prev', this._pageClick(page-1)));
     		}
     		
     		if (this.options.first !== false) {
-    			this.$el.prepend(Pagination.page(this.options.first, 'first', this._pageClick(1)));
+    			this.$el.prepend(this._page(this.options.first, 'first', this._pageClick(1)));
     		}
     		
     		if (this.options.next !== false) {
-    			this.$el.append(Pagination.page(this.options.next, 'next', this._pageClick(page+1)));
+    			this.$el.append(this._page(this.options.next, 'next', this._pageClick(page+1)));
     		}
     		
     		if (this.options.last !== false) {
-    			this.$el.append(Pagination.page(this.options.last, 'last', this._pageClick(this.options.totalPages)));
+    			this.$el.append(this._page(this.options.last, 'last', this._pageClick(this.options.totalPages)));
     		}
     		
     		// set buttons classes
@@ -251,6 +245,10 @@
     		if (page === this.options.totalPages) {
     			this.$el.find('.last, .next').addClass('disabled');
     		}
+	    };
+	    
+	    this._page =  function (text, cls, cb) {
+			return $('<li class="' + cls + '" />').append('<a href="#">' + text + '</a>').click(cb || $.noop);
 	    };
 	}
 	
