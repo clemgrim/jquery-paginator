@@ -193,7 +193,15 @@
 	    	if (this.options.count) {
 	    		var first = start + 1;
 	    		var last = start + shown;
-	    		this.$el.prev('.pagination-count').text((first != last ? first + ' à ' +  last : first) + ' sur ' + this.results.length);
+	    		var counter = first != last ? this.options.counter : this.options.counterObvious;
+
+	    		counter = counter.replace('{{first}}', first)
+    							.replace('{{last}}', last)
+    							.replace('{{count}}', this.results.length)
+    							.replace('{{page}}', page)
+    							.replace('{{pageCount}}', this.options.totalPages);
+	    		
+	    		this.$el.prev('.pagination-count').html(counter);
 	    	}
 	    };
 	    
@@ -257,6 +265,8 @@
 	    onClick: $.noop,
 	    onDraw: $.noop,
 	    hideWhenUseless: true,
-	    count: false
+	    count: false,
+	    counter: '{{first}} to {{last}} of {{count}}',
+	    counterObvious: '{{first}} of {{count}}'
 	};
 })(jQuery);
