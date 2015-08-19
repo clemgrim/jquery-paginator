@@ -8,9 +8,9 @@
 		
 		this.results = [];
 		
-		this._page = 1;
-		
 		this.totalPages = 1;
+		
+		this.page = 1;
 		
 		/** Init pagination */
 		this.init = function (options) {
@@ -213,7 +213,7 @@
 	    	}
 	    	
     		for (var i = start ; i <= end ; i++) {
-    			var p = Pagination.page(i, 'page', this._pageClick(i));
+    			var p = this._page(i, 'page', this._pageClick(i));
     			
     			if (i == page) {
     				p.addClass('active');
