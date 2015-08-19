@@ -9,6 +9,10 @@ This plugin handle the pagination for elements inside a list :
 * you can apply filter on your items, to update pagination
 
 ```html
+<!-- Pagination container -->
+<ul id="pagination"></ul>
+
+<!-- Item list -->
 <div class="block odd">
   <h3>My title</h3>
   <p>Purus volutpat adipisci</p>
@@ -44,7 +48,7 @@ $('#pagination').paginate({
 ```
 ```js
 // after initialize pagination
-$('#button').click(function(){
+$('#filter').click(function(){
   $('#pagination').paginate('pagine', function() {
     return $(this).hasClass('odd');
   });
