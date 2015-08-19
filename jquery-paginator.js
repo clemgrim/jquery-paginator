@@ -10,6 +10,8 @@
 		
 		this._page = 1;
 		
+		this.totalPages = 1;
+		
 		/** Init pagination */
 		this.init = function (options) {
 			var self = this;
@@ -74,7 +76,7 @@
 		    	}
 	    	}
 	    	
-	    	this.options.totalPages = Math.ceil(this.results.length / this.options.nbItemsPerPage);
+	    	this.totalPages = Math.ceil(this.results.length / this.options.nbItemsPerPage);
 
 	    	// update current page
 	    	this.setPage(page);
@@ -82,17 +84,17 @@
 	    
 	    /** Change the current page */
 	    this.setPage = function (page) {
-	    	page = page > this.options.totalPages || page < 1 ? 1 : parseInt(page);
+	    	page = page > this.totalPages || page < 1 ? 1 : parseInt(page);
 
 	    	var start, end;
     		var delta = parseInt(this.options.visiblePages / 2);
     		
     		// determine start and end page to display
-    		if (page + delta <= this.options.totalPages) {
+    		if (page + delta <= this.totalPages) {
 	    		start = Math.max(page - delta,  1);
-	    		end = Math.min(start + this.options.visiblePages - 1, this.options.totalPages);
+	    		end = Math.min(start + this.options.visiblePages - 1, this.totalPages);
     		} else {
-	    		end = Math.min(page + delta, this.options.totalPages);
+	    		end = Math.min(page + delta, this.totalPages);
 	    		start = Math.max(end - this.options.visiblePages + 1,  1);
     		}
 
@@ -144,7 +146,7 @@
     							.replace('{{last}}', last)
     							.replace('{{count}}', this.results.length)
     							.replace('{{page}}', page)
-    							.replace('{{pageCount}}', this.options.totalPages);
+    							.replace('{{pageCount}}', this.totalPages);
 	    		
 	    		this._getCounterTarget().html(counter);
 	    	}
@@ -163,7 +165,7 @@
 	    
 	    /** Get page count */
 	    this.getPageCount = function () {
-	    	return this.options.totalPages;
+	    	return this.totalPages;
 	    };
 	    
 	    /** Get the current page */
@@ -234,7 +236,7 @@
     		}
     		
     		if (this.options.last !== false) {
-    			this.$el.append(this._page(this.options.last, 'last', this._pageClick(this.options.totalPages)));
+    			this.$el.append(this._page(this.options.last, 'last', this._pageClick(this.totalPages)));
     		}
     		
     		// set buttons classes
@@ -242,7 +244,7 @@
     			this.$el.find('.first, .prev').addClass('disabled');
     		}
     		
-    		if (page === this.options.totalPages) {
+    		if (page === this.totalPages) {
     			this.$el.find('.last, .next').addClass('disabled');
     		}
 	    };
@@ -268,20 +270,19 @@
 	
 	$.fn.paginate.defaults = {
 		startPage: 1,
-	    totalPages: 1,
 	    visiblePages: 5,
 	    href: '#/page-{{number}}',
-	    first: '<i class="fa fa-step-backward"></i>',
+	    first: '',
 	    prev: false,
 	    next: false,
-	    last: '<i class="fa fa-step-forward"></i>',
+	    last: '',
 	    selector: '.item',
 	    nbItemsPerPage: 5,
 	    onClick: $.noop,
 	    onDraw: $.noop,
 	    hideWhenUseless: true,
 	    count: false,
-	    counter: '{{first}} to {{last}} to {{count}}',
+	    counter: '{{first}} to {{last}} of {{count}}',
 	    counterObvious: '{{first}} of {{count}}',
 	    counterTarget: false,
 	};
